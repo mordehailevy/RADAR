@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RADAR — Live Demo</title>
+<meta name="description" content="RADAR: an AI multi-agent market analysis system. Interactive demo of a real evening report, by Mordehai Levy." />
+<meta property="og:title" content="RADAR — AI multi-agent market analysis" />
+<meta property="og:description" content="650+ assets, a nightly ML model, a team of AI agents and strict risk rules. Interactive demo." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #020617; --card: #0b1222; --card2: #0f1830; --border: #243049; --fg: #f8fafc; --muted: #a3aec2;
+    --up: #22c55e; --up-soft: #4ade80; --down: #f87171; --warn: #fbbf24; --blue: #60a5fa;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; line-height: 1.55;
+    background-image: linear-gradient(#24304922 1px, transparent 1px), linear-gradient(90deg, #24304922 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  a { color: var(--up-soft); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  header.top {
+    position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+    background: #020617cc; border-bottom: 1px solid var(--border);
+  }
+  header.top .wrap { display: flex; align-items: center; gap: 16px; height: 60px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 4px; }
+  .logo svg { width: 28px; height: 28px; }
+  nav { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+  nav a { color: var(--muted); }
+  nav a:hover { color: var(--fg); text-decoration: none; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--up); border: 1px solid #22c55e55; background: #22c55e14;
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--up); box-shadow: 0 0 10px var(--up); }
+  .hero { padding: 64px 0 36px; }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.08; margin: 18px 0 14px; letter-spacing: -1px; }
+  h1 span { color: var(--up); }
+  .lead { font-size: 18px; color: var(--muted); max-width: 760px; margin: 0; }
+  .note { margin-top: 18px; font-size: 13px; color: var(--muted); }
+  section { padding: 36px 0; }
+  h2 { font-size: 26px; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 22px; }
+  .kicker { font-size: 12px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--up); margin-bottom: 8px; }
+  .grid { display: grid; gap: 14px; }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: 1.5fr 1fr; }
+  @media (max-width: 860px) { .g4 { grid-template-columns: repeat(2, 1fr); } .g3, .g2 { grid-template-columns: 1fr; } nav { display: none; } }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; }
+  .kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .kpi .value { font-size: 30px; font-weight: 700; margin-top: 4px; }
+  .kpi .hint { font-size: 13px; color: var(--muted); }
+  .up { color: var(--up-soft); } .down { color: var(--down); } .warn { color: var(--warn); } .blue { color: var(--blue); }
+  .mono { font-family: var(--mono); }
+  /* pipeline */
+  .pipe { counter-reset: step; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .step { position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 14px 14px 52px; }
+  .step::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 14px; top: 14px; width: 26px; height: 26px;
+    border-radius: 8px; background: #22c55e1f; color: var(--up); font-weight: 700; font-size: 13px; display: grid; place-items: center;
+  }
+  .step b { display: block; font-size: 15px; }
+  .step span { font-size: 13px; color: var(--muted); }
+  /* ideas */
+  .ideas { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .ideas th { text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .ideas td { padding: 10px; border-bottom: 1px solid #24304966; }
+  .ideas tr { cursor: pointer; transition: background .15s; }
+  .ideas tbody tr:hover { background: #ffffff08; }
+  .ideas tr.active { background: #22c55e12; }
+  .side { font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+  .side.long { background: #22c55e22; color: var(--up-soft); }
+  .side.short { background: #f8717122; color: var(--down); }
+  .bar { height: 6px; background: #ffffff10; border-radius: 4px; overflow: hidden; min-width: 80px; }
+  .bar i { display: block; height: 100%; background: var(--up); border-radius: 4px; }
+  /* trade plan */
+  .plan-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+  .plan-head h3 { margin: 0; font-size: 22px; }
+  .chart svg { width: 100%; height: auto; display: block; }
+  .levels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+  .lvl { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .lvl small { color: var(--muted); display: block; font-size: 12px; }
+  .lvl strong { font-family: var(--mono); font-size: 17px; }
+  .gauge { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+  .gauge svg { width: 110px; height: 110px; flex: none; }
+  .fam { display: grid; grid-template-columns: 1fr 120px 52px; gap: 10px; align-items: center; font-size: 13px; padding: 5px 0; }
+  .fam .track { position: relative; height: 8px; background: #ffffff10; border-radius: 4px; }
+  .fam .track::after { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--border); }
+  .fam .fill { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+  .why { margin: 12px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+  .why li { margin: 4px 0; }
+  /* agents */
+  .room { display: grid; grid-template-columns: 1.2fr auto 1fr auto 1fr auto 1fr; gap: 10px; align-items: center; }
+  @media (max-width: 860px) { .room { grid-template-columns: 1fr; } .arrow { transform: rotate(90deg); justify-self: center; } }
+  .desks { display: grid; gap: 6px; }
+  .desk, .agent { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; font-size: 14px; }
+  .agent { border-color: #22c55e55; }
+  .agent b { display: block; }
+  .agent span { color: var(--muted); font-size: 13px; }
+  .arrow { color: var(--up); font-size: 22px; text-align: center; }
+  .model { font-family: var(--mono); font-size: 11px; color: var(--blue); }
+  /* schedule */
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 860px) { .timeline { grid-template-columns: 1fr 1fr; } }
+  .time { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--up-soft); }
+  .rules td, .rules th { padding: 9px 10px; border-bottom: 1px solid #24304966; text-align: left; font-size: 14px; }
+  .rules th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+  table.rules { width: 100%; border-collapse: collapse; }
+  .pill { display: inline-block; font-size: 12px; padding: 3px 10px; border: 1px solid var(--border); border-radius: 999px; margin: 3px 4px 3px 0; color: var(--muted); }
+  footer { border-top: 1px solid var(--border); margin-top: 30px; padding: 26px 0 40px; color: var(--muted); font-size: 13px; }
+  .cta { display: inline-block; margin-top: 18px; padding: 10px 16px; border-radius: 10px; background: var(--up); color: #02150a; font-weight: 700; }
+  .cta.ghost { background: transparent; color: var(--fg); border: 1px solid var(--border); margin-left: 8px; }
+  .cta:hover { text-decoration: none; filter: brightness(1.08); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="none" stroke="#22c55e" stroke-opacity=".5"/><circle cx="20" cy="20" r="11" fill="none" stroke="#22c55e" stroke-opacity=".35"/><path d="M20 20 L20 2 A18 18 0 0 1 35.6 11 Z" fill="#22c55e" fill-opacity=".35"/><circle cx="27" cy="13" r="2.2" fill="#4ade80"/><circle cx="20" cy="20" r="2" fill="#4ade80"/></svg>
+      RADAR
+    </div>
+    <nav>
+      <a href="#evening">The evening</a>
+      <a href="#ideas">Trade ideas</a>
+      <a href="#room">AI trading room</a>
+      <a href="#risk">Risk</a>
+      <a href="#quality">Transparency</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="hero">
+    <span class="tag"><span class="dot"></span>Interactive demo · sample evening report</span>
+    <h1>An AI <span>multi-agent</span> trading room<br />that analyzes 650+ assets every night.</h1>
+    <p class="lead">RADAR collects real market data, scores every asset with a machine-learning model and eight families of analysis, then hands the best candidates to a team of AI agents that debate them and produce a risk-controlled trade plan. This page replays one real evening, the session of <b>30 October 2026</b>.</p>
+    <p class="note">Numbers on this page come from a real RADAR run. Personal data is removed and the source code is private. RADAR is a personal decision-support project, not investment advice. Its portfolio is simulated: no real money is traded.</p>
+    <a class="cta" href="https://github.com/mordehailevy/radar">View the project on GitHub</a><a class="cta ghost" href="#ideas">See tonight's ideas</a>
+  </div>
+
+  <section id="evening">
+    <div class="grid g4">
+      <div class="card kpi"><div class="label">Assets analyzed</div><div class="value">676</div><div class="hint">stocks, indices, commodities, crypto, rates, FX</div></div>
+      <div class="card kpi"><div class="label">Market regime</div><div class="value up">Risk-on</div><div class="hint">score +2 / 5</div></div>
+      <div class="card kpi"><div class="label">Economic cycle</div><div class="value up">Expansion</div><div class="hint">yield curve, Sahm rule, credit, inflation</div></div>
+      <div class="card kpi"><div class="label">Ideas proposed</div><div class="value">53 <span class="up" style="font-size:18px">long</span> · 9 <span class="down" style="font-size:18px">short</span></div><div class="hint">only when the analyses agree</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">How one evening works</div>
+    <h2>From raw data to a trade plan, fully automated</h2>
+    <p class="sub">A Python pipeline runs on a schedule. Every step below happens without any manual action.</p>
+    <div class="pipe">
+      <div class="step"><b>Market data</b><span>~650 assets: S&amp;P 500, Nasdaq 100, CAC 40, indices, 16 commodity futures, 9 cryptos, rates, FX, volatility (Yahoo Finance, FRED, Binance).</span></div>
+      <div class="step"><b>Economy &amp; regime</b><span>Cycle phase from the yield curve, Sahm rule, unemployment, credit and inflation. Risk-on / risk-off regime.</span></div>
+      <div class="step"><b>Trader positioning</b><span>CFTC COT futures positioning, put/call ratios, option walls, crypto funding and open interest.</span></div>
+      <div class="step"><b>Money flow &amp; macro link</b><span>Chaikin Money Flow, OBV, MFI, sector rotation, and each asset's sensitivity to rates, the dollar, oil and the VIX.</span></div>
+      <div class="step"><b>Machine learning</b><span>Gradient-boosting model retrained every night, validated walk-forward on 12 months of unseen data.</span></div>
+      <div class="step"><b>Convergence Index</b><span>Eight analysis families each vote from −1 to +1. An idea is proposed only when they agree (index above 62).</span></div>
+      <div class="step"><b>AI trading room</b><span>Specialist desks, a contrarian, a portfolio manager and a risk controller review the candidates.</span></div>
+      <div class="step"><b>Report &amp; portfolio</b><span>Reports published at 21:00 and 23:45, push notifications, and a simulated €100,000 portfolio on real prices.</span></div>
+    </div>
+  </section>
+
+  <section id="ideas">
+    <div class="kicker">Tonight's ideas</div>
+    <h2>Click an idea to open its analysis</h2>
+    <p class="sub">The Convergence Index (0 to 100) measures how strongly the analysis families agree. 50 means no view; above 75 means high conviction.</p>
+    <div class="grid g2">
+      <div class="card" style="padding:6px 6px 0">
+        <table class="ideas">
+          <thead><tr><th>Asset</th><th>Side</th><th>Class</th><th>Convergence</th></tr></thead>
+          <tbody id="ideaRows"></tbody>
+        </table>
+      </div>
+      <div class="card" id="detail"></div>
+    </div>
+  </section>
+
+  <section id="plan">
+    <div class="kicker">Trade plan in detail</div>
+    <h2>Chevron (CVX): every level has a reason</h2>
+    <p class="sub">The stop sits behind a real support zone, never at a random percentage. Position size is computed so that a stopped trade loses only 0.75% of capital.</p>
+    <div class="grid g2">
+      <div class="card chart"><div id="chart"></div>
+        <div class="levels">
+          <div class="lvl"><small>Entry (buy stop above today's high)</small><strong>236.94</strong></div>
+          <div class="lvl"><small>Protective stop · risk 6.8%</small><strong class="down">220.91</strong></div>
+          <div class="lvl"><small>Target 1 · sell half · +10.1%</small><strong class="up">260.97</strong></div>
+          <div class="lvl"><small>Target 2 · reward/risk 3.0 · +20.3%</small><strong class="up">285.01</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="gauge">
+          <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="#ffffff14" stroke-width="12"/><circle cx="60" cy="60" r="50" fill="none" stroke="#22c55e" stroke-width="12" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="12" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" fill="#f8fafc" font-size="30" font-weight="700" font-family="IBM Plex Sans">96</text></svg>
+          <div><b>Convergence 96 / 100</b><br /><span style="color:var(--muted);font-size:14px">8 of 8 analysis families agree. Size: 52 shares, €11,090 committed, €750 at risk.</span></div>
+        </div>
+        <div id="families"></div>
+        <ul class="why">
+          <li>Breakout above the 20-day high on 1.47× average volume.</li>
+          <li>Bullish Ichimoku and a rising structure of higher highs and higher lows.</li>
+          <li>Macro tailwind: Chevron tends to rise with oil, which is rising.</li>
+          <li>Options market: implied move ±9.3%, call wall at 250, put wall at 220.</li>
+          <li>After target 1: sell half, move the stop to entry, trail at 3 ATR.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="room">
+    <div class="kicker">AI trading room</div>
+    <h2>A team of AI agents debates every candidate</h2>
+    <p class="sub">Built on Claude. Each agent has its own system prompt and role, and they work in sequence like a real trading desk. Lessons from past decisions are fed back into the next session.</p>
+    <div class="room">
+      <div class="desks">
+        <div class="desk">🇺🇸 US equities desk</div><div class="desk">🌍 Europe &amp; Asia desk</div><div class="desk">₿ Crypto desk</div>
+        <div class="desk">🛢 Commodities desk</div><div class="desk">💱 Rates &amp; FX desk</div><div class="desk">📈 Indices &amp; ETFs desk</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="agent"><b>Contrarian</b><span>Attacks each proposal and looks for what could go wrong.</span><div class="model">Sonnet</div></div>
+      <div class="arrow">→</div>
+      <div class="agent"><b>Portfolio manager</b><span>Decides which ideas become orders, given the existing book.</span><div class="model">Opus</div></div>
+      <div class="arrow">→</div>
+      <div class="agent"><b>Risk controller</b><span>Checks exposure, concentration and limits before anything is executed.</span><div class="model">Sonnet</div></div>
+    </div>
+  </section>
+
+  <section id="risk">
+    <div class="grid g2">
+      <div>
+        <div class="kicker">Risk rules</div>
+        <h2>Strict limits, enforced in code</h2>
+        <p class="sub">The simulated portfolio only fills an order if the real price reaches it. Stops, gaps, fees and EUR/USD conversion are included, and results are compared with the S&amp;P 500 and CAC 40.</p>
+        <table class="rules">
+          <tr><th>Rule</th><th>Value</th></tr>
+          <tr><td>Simulated capital</td><td class="mono">€100,000</td></tr>
+          <tr><td>Maximum loss per trade</td><td class="mono">0.75% of capital</td></tr>
+          <tr><td>Maximum open positions</td><td class="mono">10</td></tr>
+          <tr><td>Per class (stocks / indices / commodities / crypto)</td><td class="mono">7 / 2 / 3 / 2</td></tr>
+          <tr><td>Trade horizon</td><td class="mono">15 sessions</td></tr>
+          <tr><td>Fees per order</td><td class="mono">0.05%</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="kicker">Schedule (Israel time)</div>
+        <h2>Two reports every evening</h2>
+        <p class="sub">Scheduled jobs on macOS, results pushed to a private Next.js dashboard.</p>
+        <div class="timeline" style="grid-template-columns:1fr 1fr">
+          <div class="card"><div class="time">21:00</div>Pre-report: Europe closed, US on the last completed session</div>
+          <div class="card"><div class="time">21:15</div>AI summary of the pre-report</div>
+          <div class="card"><div class="time">23:45</div>Official report after Wall Street closes; portfolio updated</div>
+          <div class="card"><div class="time">23:55</div>AI summary: orders for tomorrow and what changed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quality">
+    <div class="kicker">Transparency</div>
+    <h2>The system grades itself, every night</h2>
+    <p class="sub">Every report ends with an honest quality check. No hiding: when a model has no edge, the report says so, and its weight drops automatically.</p>
+    <div class="grid g3">
+      <div class="card kpi"><div class="label">ML model, walk-forward AUC</div><div class="value warn">0.504</div><div class="hint">12 months out of sample on 339,404 observations. 0.50 = chance: the model alone has no edge yet, so its weight tonight is only 4%.</div></div>
+      <div class="card kpi"><div class="label">Rules backtest, 3 years</div><div class="value">1,098 <span style="font-size:16px;color:var(--muted)">trades</span></div><div class="hint">47% winners · profit factor 1.18 · +14.0% per year · max drawdown −14.2% (S&amp;P 500: +20.9% / −18.9%)</div></div>
+      <div class="card kpi"><div class="label">Self-learning weights</div><div class="value blue">Daily</div><div class="hint">Each signal family is re-weighted by its rank correlation with realized returns over the last 60 sessions.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="kicker">Built with</div>
+    <div>
+      <span class="pill">Python</span><span class="pill">pandas</span><span class="pill">NumPy</span><span class="pill">scikit-learn</span><span class="pill">Claude (Sonnet &amp; Opus)</span><span class="pill">Multi-agent prompts</span><span class="pill">Yahoo Finance</span><span class="pill">FRED</span><span class="pill">Alpha Vantage</span><span class="pill">Binance</span><span class="pill">CFTC COT</span><span class="pill">Next.js</span><span class="pill">React</span><span class="pill">Tailwind CSS</span><span class="pill">Vercel</span><span class="pill">macOS LaunchAgents</span><span class="pill">ntfy push</span><span class="pill">38 automated tests</span>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    Built by <a href="https://www.linkedin.com/in/mordehailevy">Mordehai Levy</a>, full-stack &amp; AI developer, Tel Aviv · <a href="https://github.com/mordehailevy">GitHub</a><br />
+    RADAR is a personal decision-support project. Nothing on this page is investment advice. Past performance does not guarantee future results.
+  </div>
+</footer>
+
+<script>
+const DATA = {"candles":[{"o":184.6,"h":186.13,"l":184.26,"c":184.95},{"o":187.25,"h":193.3,"l":187.25,"c":193.22},{"o":192.57,"h":195.75,"l":192.57,"c":194.96},{"o":193.53,"h":195.69,"l":192.9,"c":194.9},{"o":193.31,"h":196.39,"l":192.07,"c":195.99},{"o":197.15,"h":199.89,"l":196.64,"c":198.27},{"o":198.99,"h":201.92,"l":198.07,"c":200.95},{"o":203.26,"h":204.44,"l":201.95,"c":203.96},{"o":205.05,"h":207.68,"l":204.26,"c":205.76},{"o":208.9,"h":208.98,"l":205.52,"c":205.77},{"o":205.93,"h":207.82,"l":205.01,"c":205.27},{"o":203.67,"h":205.3,"l":201.75,"c":203.09},{"o":201.03,"h":202.06,"l":199.79,"c":199.89},{"o":198.73,"h":202.39,"l":198.12,"c":200.21},{"o":199.57,"h":200.88,"l":197.82,"c":199.77},{"o":199.98,"h":202.24,"l":199.56,"c":201.86},{"o":206.08,"h":208.42,"l":203.84,"c":206.14},{"o":209.0,"h":211.08,"l":207.8,"c":211.05},{"o":210.49,"h":212.79,"l":209.46,"c":211.78},{"o":212.38,"h":213.2,"l":211.17,"c":211.32},{"o":209.51,"h":209.86,"l":207.12,"c":208.6},{"o":211.25,"h":213.31,"l":209.18,"c":209.8},{"o":212.88,"h":215.28,"l":212.23,"c":213.81},{"o":217.4,"h":217.4,"l":211.34,"c":212.76},{"o":212.02,"h":215.55,"l":212.02,"c":214.06},{"o":217.0,"h":217.65,"l":211.27,"c":212.17},{"o":212.89,"h":217.78,"l":212.74,"c":217.77},{"o":215.09,"h":215.28,"l":210.37,"c":211.54},{"o":209.61,"h":211.75,"l":209.17,"c":211.57},{"o":211.09,"h":211.9,"l":207.31,"c":209.51},{"o":207.89,"h":209.0,"l":203.5,"c":203.67},{"o":201.87,"h":204.44,"l":200.78,"c":202.41},{"o":204.46,"h":207.0,"l":203.48,"c":205.51},{"o":207.24,"h":208.1,"l":204.87,"c":205.65},{"o":203.81,"h":206.54,"l":203.4,"c":204.45},{"o":207.0,"h":208.25,"l":205.38,"c":206.37},{"o":203.05,"h":205.48,"l":202.7,"c":204.38},{"o":205.09,"h":206.83,"l":204.21,"c":204.21},{"o":203.33,"h":207.41,"l":202.82,"c":207.1},{"o":204.8,"h":207.32,"l":204.45,"c":206.69},{"o":206.83,"h":207.26,"l":201.96,"c":206.47},{"o":205.57,"h":208.69,"l":204.89,"c":207.58},{"o":208.44,"h":210.14,"l":204.86,"c":205.15},{"o":209.32,"h":212.36,"l":208.96,"c":211.55},{"o":211.05,"h":213.72,"l":210.71,"c":211.98},{"o":214.54,"h":216.67,"l":213.75,"c":215.0},{"o":217.0,"h":218.79,"l":215.95,"c":217.73},{"o":218.89,"h":222.55,"l":218.54,"c":222.04},{"o":222.82,"h":223.46,"l":218.05,"c":219.32},{"o":221.85,"h":225.31,"l":220.41,"c":224.99},{"o":223.88,"h":225.67,"l":223.12,"c":224.37},{"o":226.48,"h":227.28,"l":221.56,"c":225.71},{"o":225.9,"h":228.48,"l":224.19,"c":226.78},{"o":228.86,"h":229.04,"l":222.86,"c":226.68},{"o":228.19,"h":233.74,"l":227.98,"c":233.21},{"o":231.7,"h":234.08,"l":230.53,"c":232.01},{"o":230.96,"h":232.27,"l":227.63,"c":228.23},{"o":228.88,"h":231.56,"l":228.34,"c":229.2},{"o":232.25,"h":232.95,"l":229.01,"c":231.46},{"o":234.01,"h":236.48,"l":233.22,"c":235.52}],"zones":[[184.26,185.11,3],[189.82,191.02,3],[195.84,197.82,4],[200.78,201.96,2],[208.25,210.92,3]]};
+const IDEAS = [
+  { name: "Chevron", tk: "CVX", side: "long", cls: "Stock · Energy", score: 96, note: "Breakout with volume, bullish Ichimoku, oil tailwind. 8 of 8 families agree.", plan: "#plan" },
+  { name: "Canada Energy ETF", tk: "XEG.TO", side: "long", cls: "ETF", score: 90, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "ExxonMobil", tk: "XOM", side: "long", cls: "Stock · Energy", score: 87, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "Europe Healthcare ETF", tk: "EXV4.DE", side: "long", cls: "ETF", score: 86, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "Japan Autos ETF", tk: "1622.T", side: "long", cls: "ETF", score: 85, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "Brent crude", tk: "BZ=F", side: "long", cls: "Commodity", score: 83, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "WTI crude", tk: "CL=F", side: "long", cls: "Commodity", score: 81, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "NZD / USD", tk: "NZDUSD=X", side: "long", cls: "FX", score: 70, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "USD / CHF", tk: "USDCHF=X", side: "long", cls: "FX", score: 65, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "DAX", tk: "^GDAXI", side: "long", cls: "Index", score: 64, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+  { name: "CAC 40", tk: "^FCHI", side: "short", cls: "Index", score: 62, note: "In the full report, this idea comes with its own entry, stop, two targets, position size and reasons." },
+];
+const FAMILIES = [
+  ["Technical analysis", 1.00], ["News sentiment", 1.00], ["Seasonality", 0.99], ["Macro link", 0.73],
+  ["Fundamentals & analyst consensus", 0.72], ["Money flow", 0.68], ["Trader positioning (COT, options)", 0.40], ["ML model", 0.21],
+];
+const $ = (s) => document.querySelector(s);
+
+function renderIdeas(active = 0) {
+  $("#ideaRows").innerHTML = IDEAS.map((d, i) => `
+    <tr class="${i === active ? "active" : ""}" data-i="${i}">
+      <td><b>${d.name}</b><br><span class="mono" style="color:var(--muted);font-size:12px">${d.tk}</span></td>
+      <td><span class="side ${d.side}">${d.side === "long" ? "BUY" : "SELL"}</span></td>
+      <td style="color:var(--muted)">${d.cls}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div class="bar" style="flex:1"><i style="width:${d.score}%;background:${d.side === "long" ? "var(--up)" : "var(--down)"}"></i></div><span class="mono">${d.score}</span></div></td>
+    </tr>`).join("");
+  const d = IDEAS[active];
+  $("#detail").innerHTML = `
+    <div class="kicker">${d.side === "long" ? "Buy idea" : "Sell idea"}</div>
+    <h3 style="margin:0 0 4px;font-size:22px">${d.name} <span class="mono" style="color:var(--muted);font-size:14px">${d.tk}</span></h3>
+    <div style="font-size:48px;font-weight:700" class="${d.score >= 75 ? "up" : "warn"}">${d.score}<span style="font-size:18px;color:var(--muted)"> / 100</span></div>
+    <p style="color:var(--muted)">${d.score >= 75 ? "High conviction" : "Moderate conviction"} · ${d.cls}</p>
+    <p>${d.note}</p>
+    ${d.plan ? `<a href="${d.plan}">Open the full trade plan ↓</a>` : ""}`;
+  document.querySelectorAll("#ideaRows tr").forEach((tr) => tr.addEventListener("click", () => renderIdeas(+tr.dataset.i)));
+}
+
+function renderFamilies() {
+  $("#families").innerHTML = FAMILIES.map(([n, v]) => {
+    const w = Math.abs(v) * 50, left = v >= 0 ? 50 : 50 - w;
+    return `<div class="fam"><span>${n}</span><div class="track"><div class="fill" style="left:${left}%;width:${w}%;background:${v >= 0 ? "var(--up)" : "var(--down)"}"></div></div><span class="mono ${v >= 0 ? "up" : "down"}" style="text-align:right">${v >= 0 ? "+" : ""}${v.toFixed(2)}</span></div>`;
+  }).join("");
+}
+
+function renderChart() {
+  const c = DATA.candles, W = 720, H = 330, padL = 8, padR = 62, padT = 14, padB = 16;
+  const levels = { entry: 236.94, stop: 220.91, t1: 260.97, t2: 285.01 };
+  const lo = Math.min(...c.map((k) => k.l), levels.stop) - 4, hi = levels.t2 + 4;
+  const y = (v) => padT + (hi - v) / (hi - lo) * (H - padT - padB);
+  const step = (W - padL - padR) / c.length, bw = Math.max(3, step * 0.6);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Chevron daily candles with entry, stop and targets">`;
+  for (const [a, b] of DATA.zones) s += `<rect x="${padL}" width="${W - padL - padR}" y="${y(b)}" height="${Math.max(2, y(a) - y(b))}" fill="#60a5fa" fill-opacity=".10"/>`;
+  c.forEach((k, i) => {
+    const x = padL + i * step + step / 2, up = k.c >= k.o, col = up ? "#22c55e" : "#f87171";
+    s += `<line x1="${x}" x2="${x}" y1="${y(k.h)}" y2="${y(k.l)}" stroke="${col}" stroke-width="1"/>`;
+    s += `<rect x="${x - bw / 2}" y="${y(Math.max(k.o, k.c))}" width="${bw}" height="${Math.max(1, Math.abs(y(k.o) - y(k.c)))}" fill="${col}"/>`;
+  });
+  const line = (v, col, label, dash) => {
+    s += `<line x1="${padL}" x2="${W - padR}" y1="${y(v)}" y2="${y(v)}" stroke="${col}" stroke-width="1.4" ${dash ? 'stroke-dasharray="5 4"' : ""}/>`;
+    s += `<text x="${W - padR + 6}" y="${y(v) + 4}" fill="${col}" font-size="11" font-family="IBM Plex Mono">${label}</text>`;
+  };
+  line(levels.t2, "#4ade80", "T2 285", true);
+  line(levels.t1, "#4ade80", "T1 261", true);
+  line(levels.entry, "#f8fafc", "IN 237", false);
+  line(levels.stop, "#f87171", "SL 221", true);
+  s += `<text x="${padL + 4}" y="${H - 4}" fill="#a3aec2" font-size="11" font-family="IBM Plex Sans">Last 60 sessions · blue bands = support zones found by the algorithm</text></svg>`;
+  $("#chart").innerHTML = s;
+}
+
+renderIdeas(0); renderFamilies(); renderChart();
+</script>
+</body>
+</html>

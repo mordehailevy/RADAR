@@ -113,7 +113,7 @@ The goal is not to "beat the market" with a black box, but to build a discipline
 - **Fully automated:** scheduled macOS jobs (LaunchAgents) produce a pre-report at 21:00 and an official report at 23:45 (Israel time), after Wall Street closes, plus AI summaries at 21:15 and 23:55.
 - **Private dashboard:** Next.js app on Vercel with email/password authentication, invite-based access and an "analyze now" button that the local engine picks up within a minute.
 - **Notifications:** push notification for every report.
-- **Safeguards:** a manual kill switch that stops all AI activity instantly, activity logs to investigate any incident, 38 automated tests, secrets kept out of Git with an encrypted backup.
+- **Safeguards:** a manual kill switch that stops all AI activity instantly, activity logs to investigate any incident, 40 automated tests, secrets kept out of Git with an encrypted backup.
 - **Cost-aware:** model choice per agent (Sonnet for desks, Opus only where judgment matters most).
 
 ## Tech stack

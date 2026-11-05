@@ -2,7 +2,7 @@
 
 **A personal project that analyzes ~650 financial assets every night with machine learning and a team of AI agents, then produces risk-controlled trade plans and runs a simulated portfolio on real prices.**
 
-**[▶ Live demo](https://radar-demo-delta.vercel.app)** · **[Demo video (1 min 49)](docs/radar-demo-en.mp4)** · Built by [Mordehai Levy](https://www.linkedin.com/in/mordehailevy)
+**[▶ Live demo](https://radar-demo-delta.vercel.app)** · **[Demo video (1 min 50)](docs/radar-demo-en.mp4)** · Built by [Mordehai Levy](https://www.linkedin.com/in/mordehailevy)
 
 [![Watch the RADAR demo video](docs/video-thumbnail.png)](docs/radar-demo-en.mp4)
 

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RADAR — Demo Video</title>
+<meta name="description" content="RADAR demo video: an AI multi-agent market analysis system, by Mordehai Levy." />
+<style>
+  :root { --bg:#020617; --fg:#f8fafc; --muted:#a3aec2; --up:#22c55e; --border:#243049; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--fg); font-family:"IBM Plex Sans",system-ui,sans-serif;
+         display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 16px; }
+  .k { font-size:12px; letter-spacing:3px; text-transform:uppercase; color:var(--up); font-weight:600; }
+  h1 { margin:8px 0 18px; font-size:clamp(24px,4vw,36px); text-align:center; }
+  video { width:min(1100px,100%); border-radius:16px; border:1px solid var(--border); background:#000; }
+  p { color:var(--muted); font-size:14px; text-align:center; }
+  a { color:#4ade80; text-decoration:none; } a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+  <div class="k">RADAR · demo video</div>
+  <h1>AI multi-agent market analysis</h1>
+  <video src="radar-demo-en.mp4" poster="video-poster.png" controls playsinline preload="metadata"></video>
+  <p><a href="./">Open the interactive demo</a> · <a href="https://github.com/mordehailevy/RADAR">Project on GitHub</a> · Built by <a href="https://www.linkedin.com/in/mordehailevy">Mordehai Levy</a></p>
+</body>
+</html>

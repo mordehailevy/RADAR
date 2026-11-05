@@ -2,7 +2,7 @@
 
 **A personal project that analyzes ~650 financial assets every night with machine learning and a team of AI agents, then produces risk-controlled trade plans and runs a simulated portfolio on real prices.**
 
-**[▶ Live demo](https://radar-demo-mordehailevy.vercel.app)** · **[Demo video (1 min 49)](docs/radar-demo-en.mp4)** · Built by [Mordehai Levy](https://www.linkedin.com/in/mordehailevy)
+**[▶ Live demo](https://radar-demo-delta.vercel.app)** · **[Demo video (1 min 49)](docs/radar-demo-en.mp4)** · Built by [Mordehai Levy](https://www.linkedin.com/in/mordehailevy)
 
 [![Watch the RADAR demo video](docs/video-thumbnail.png)](docs/radar-demo-en.mp4)
 
@@ -126,7 +126,7 @@ The goal is not to "beat the market" with a black box, but to build a discipline
 
 ## Live demo
 
-The [interactive demo](https://radar-demo-mordehailevy.vercel.app) replays one real evening (session of 30 October 2026) in English: the market regime, the ranked ideas, the full Chevron trade plan, the AI trading room and the quality check. The demo is a static page ([`demo/index.html`](demo/index.html)); it does not run the engine.
+The [interactive demo](https://radar-demo-delta.vercel.app) replays one real evening (session of 30 October 2026) in English: the market regime, the ranked ideas, the full Chevron trade plan, the AI trading room and the quality check. The demo is a static page ([`demo/index.html`](demo/index.html)); it does not run the engine.
 
 ---
 

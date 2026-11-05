@@ -126,7 +126,7 @@ The goal is not to "beat the market" with a black box, but to build a discipline
 
 ## Live demo
 
-The [interactive demo](https://radar-demo-delta.vercel.app) replays one real evening (session of 30 October 2026) in English: the market regime, the ranked ideas, the full Chevron trade plan, the AI trading room and the quality check. The demo is a static page ([`demo/index.html`](demo/index.html)); it does not run the engine.
+The [interactive demo](https://radar-demo-delta.vercel.app) replays one real evening (session of 30 October 2026) in English: the market regime, the ranked ideas, the full Chevron trade plan, the AI trading room and the quality check. The demo is a static page ([`demo/index.html`](demo/index.html)); it does not run the engine. The demo video is a motion-design piece built with Remotion; its source is in [`video/`](video/).
 
 ---
 
